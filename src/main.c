@@ -12,23 +12,25 @@
 
 
 #include <stdlib.h>
-
-
 #include<unistd.h>
-#include "ft_read.h"
+#include<fcntl.h>
+#include "ft_error.h"
+#include "ft_cmd.h"
 
-int main (int argc, char *argv[])
+int main (int argc, char *argv[], char **env)
 {
-	char *file1_content;
-	//char *cmd1_content;
-	//char *cmd2_content;
-	int size;
+	int fd;
 
-	file1_content = ft_read(argv[1], &size);
-	//cmd1_content = exec_cmd(argv[2], file1_content);
+	if(argc == 0)
+		return 0;
+	fd =  open(argv[1], O_RDONLY);
+	if(fd == -1)
+	{
+		show_errno("pipex" , argv[1]);
+	}
+	fd = exec_cmd(argv[2], fd, env);
 	//cmd2_content = exec_cmd(argv[3], cmd1_content);
 	//ft_write(argv[4], cmd2_content);
-	write(1, file1_content, size);
-	free(file1_content);
+	//free(file1_content);
 	return 0;
 }

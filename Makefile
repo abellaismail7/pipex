@@ -2,7 +2,7 @@ CC 		= cc
 CCFLAGS = -Wall -Werror -Wextra
 INCLUDE	= -I./includes
 
-FILES 	= main ft_read ft_str ft_error
+FILES 	= main ft_split ft_cmd ft_str ft_error
 OBJ		= $(FILES:=.o)
 EXEC	= pipex
 B_DIR	= build
