@@ -1,3 +1,3 @@
 
 
-int exec_cmd(char *cmd, int fd, char **env);
+int exec_cmd(char **cmds, int fd, char **env);

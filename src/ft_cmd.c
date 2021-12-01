@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #include "ft_split.h"
 #include "ft_str.h"
 
@@ -37,33 +38,64 @@ char *get_cmd_path(char *cmd, char **env)
 	return filename;
 }
 
-int exec_cmd(char *cmd, int fd, char **env)
+
+int _exec(char *cmd, int *fds, int fd_to, char **env)
 {
 	char **args;
 	char *file;
+	int pid;
 	int state;
 
 	args = ft_split(cmd, ' ');
 	file = get_cmd_path(args[0], env);
 	free(args[0]);
 	args[0] = file;
-	int pid = fork();
+	pid = fork();
 	if (pid == -1)
 	{
-		
 		return 0;
 	}
-	dup2(fd, STDIN_FILENO);
-	pipe(1, STDIN_FILENO);
-	state = execve(file, args, env);
-	if (state == -1)
+	else if(pid == 0)
+	{
+		dup2(fds[fd_to], fd_to);
+		close(fds[0]);
+		close(fds[1]);
+		state = execve(file, args, env);
+		exit(state != -1);
+	}
+	return pid;
+}
+
+int exec_cmd(char **cmds, int fd, char **env)
+{
+	int fildes[2];
+	int pid1;
+	int pid2;
+	int i;
+
+	if(pipe(fildes) == -1)
 	{
 		
 		return 0;
 	}
-	
-	
 
+	dup2(fd, STDIN_FILENO);
+	i = 0;
+	pid1 = _exec(cmds[i], fildes, STDOUT_FILENO, env);
+	while(cmds[i] && cmds[i + 1])
+	{
+		pid2 = _exec(cmds[i + 1], fildes, STDIN_FILENO, env);
+		if (cmds[i + 1] == 0)
+		{
+			dup2(4, STDOUT_FILENO);
+		}
+		i++;
+	}
+	close(fildes[0]);
+	close(fildes[1]);
+
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
 
 	return 0;
 }

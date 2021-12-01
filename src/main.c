@@ -17,20 +17,22 @@
 #include "ft_error.h"
 #include "ft_cmd.h"
 
-int main (int argc, char *argv[], char **env)
+int main (int ac, char **av, char **env)
 {
-	int fd;
+	int fd_in;
+	int fd_out;
 
-	if(argc == 0)
+	if(ac < 4)
 		return 0;
-	fd =  open(argv[1], O_RDONLY);
-	if(fd == -1)
+	fd_in =  open(av[1], O_RDONLY);
+	fd_out = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT);
+	av[ac - 1] = 0;
+	if(fd_in == -1 || fd_out == -1)
 	{
-		show_errno("pipex" , argv[1]);
+		show_errno("pipex" , av[0]);
 	}
-	fd = exec_cmd(argv[2], fd, env);
-	//cmd2_content = exec_cmd(argv[3], cmd1_content);
-	//ft_write(argv[4], cmd2_content);
-	//free(file1_content);
+	exec_cmd(av + 2, fd_in, env);
+	close(fd_in);
+	close(fd_out);
 	return 0;
 }
