@@ -38,7 +38,6 @@ char *get_cmd_path(char *cmd, char **env)
 	return filename;
 }
 
-
 int _exec(char *cmd, int *fds, char **env)
 {
 	char **args;
@@ -51,6 +50,7 @@ int _exec(char *cmd, int *fds, char **env)
 	file = get_cmd_path(args[0], env);
 	free(args[0]);
 	args[0] = file;
+
 	pid = fork();
 	if (pid == -1)
 	{
@@ -64,29 +64,50 @@ int _exec(char *cmd, int *fds, char **env)
 	return pid;
 }
 
+int *fdsmap(char **cmd)
+{
+	int i;
+	int *res;
+	i = 0;
+	while (cmd[i])
+		i++;
+	res = malloc(sizeof(int *) * (i * 2));
+	return res;
+}
+
 int	*execmap(char **cmds, int fd, char **env)
 {
 	int i;
 	int count;
-	int fildes[2];
+	int *fildes;
 	int *pids;
 	
 	count = 0;
 	while(cmds[count])
 		count++;
+
+	fildes = fdsmap(cmds);
 	pids = malloc(sizeof(int *) * count);
 	dup2(fd, STDIN_FILENO);
 	close(fd);
 	i = 0;
 	while(cmds[i])
 	{
+		pipe(fildes);
 		dup2(fildes[1], STDOUT_FILENO);
-		dup2(fildes[0], STDIN_FILENO);
-		close(fildes[0]);
 		close(fildes[1]);
 		if (cmds[i + 1] == 0)
+		{
 			dup2(4, STDOUT_FILENO);
+			close(4);
+		}
+		if(i != 0)
+		{
+			dup2(*(fildes - 2), STDIN_FILENO);
+			close(*(fildes - 2));
+		}
 		pids[i] = _exec(cmds[i], fildes, env);
+		fildes += 2;
 		i++;
 	}
 	return pids;
@@ -96,19 +117,11 @@ int	*execmap(char **cmds, int fd, char **env)
 
 int exec_cmd(char **cmds, int fd, char **env)
 {
-	int fildes[2];
 	int *pids;
 	int i;
 
-	if(pipe(fildes) == -1)
-	{
-		
-		return 0;
-	}
 	pids = execmap(cmds, fd, env);
 
-	close(fildes[0]);
-	close(fildes[1]);
 	i = 0;
 	while(cmds[i])
 		waitpid(pids[i++], NULL, 0);
