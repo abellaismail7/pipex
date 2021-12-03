@@ -16,23 +16,33 @@
 #include<fcntl.h>
 #include "ft_error.h"
 #include "ft_cmd.h"
+#include "ft_pipex.h"
+
+char	die(char *basename, char *file)
+{
+	show_errno(basename, file);
+	exit(1);
+}
+
 
 int main (int ac, char **av, char **env)
 {
-	int fd_in;
-	int fd_out;
+	t_data data;
 
 	if(ac < 4)
 		return 0;
-	fd_in =  open(av[1], O_RDONLY);
-	fd_out = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT);
+	data.fd_in = open(av[1], O_RDONLY);
+	if (data.fd_in == -1)
+		die(av[0], av[1]);
+	data.fd_out = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT);
+	if (data.fd_out == -1)
+		die(av[0], av[1]);
 	av[ac - 1] = 0;
-	if(fd_in == -1 || fd_out == -1)
-	{
-		show_errno("pipex" , av[0]);
-	}
-	exec_cmd(av + 2, fd_in, env);
-	close(fd_in);
-	close(fd_out);
+	data.size	= ac - 3;
+	data.env 	= env;
+	data.cmds 	= av + 2;
+	exec_cmd(&data);
+	close(data.fd_in);
+	close(data.fd_out);
 	return 0;
 }

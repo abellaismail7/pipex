@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 #include "ft_split.h"
 #include "ft_str.h"
+#include "ft_pipex.h"
 
 char **get_paths(char **env)
 {
@@ -50,7 +51,6 @@ int _exec(char *cmd, int *fds, char **env)
 	file = get_cmd_path(args[0], env);
 	free(args[0]);
 	args[0] = file;
-
 	pid = fork();
 	if (pid == -1)
 	{
@@ -59,54 +59,49 @@ int _exec(char *cmd, int *fds, char **env)
 	else if(pid == 0)
 	{
 		state = execve(file, args, env);
+		free(args);
 		exit(state != -1);
 	}
 	return pid;
 }
 
-int *fdsmap(char **cmd)
+int handle_pipe(t_data *data, int index, int *fildes)
 {
-	int i;
-	int *res;
-	i = 0;
-	while (cmd[i])
-		i++;
-	res = malloc(sizeof(int *) * (i * 2));
-	return res;
+	if (pipe(fildes) == -1)
+		return -1;
+	dup2(fildes[1], STDOUT_FILENO);
+	close(fildes[1]);
+	if (index + 1 == data->size)
+	{
+		dup2(data->fd_out, STDOUT_FILENO);
+		close(data->fd_out);
+	}
+	if(index != 0)
+	{
+		dup2(*(fildes - 2), STDIN_FILENO);
+		close(*(fildes - 2));
+	}
+	return 0;
 }
 
-int	*execmap(char **cmds, int fd, char **env)
+int	*execmap(t_data *data)
 {
 	int i;
-	int count;
 	int *fildes;
 	int *pids;
-	
-	count = 0;
-	while(cmds[count])
-		count++;
-
-	fildes = fdsmap(cmds);
-	pids = malloc(sizeof(int *) * count);
-	dup2(fd, STDIN_FILENO);
-	close(fd);
-	i = 0;
-	while(cmds[i])
+	fildes = malloc(sizeof(int *) * (data->size * 2));
+	pids = malloc(sizeof(int *) * data->size);
+	if(fildes == NULL || pids == NULL)
 	{
-		pipe(fildes);
-		dup2(fildes[1], STDOUT_FILENO);
-		close(fildes[1]);
-		if (cmds[i + 1] == 0)
-		{
-			dup2(4, STDOUT_FILENO);
-			close(4);
-		}
-		if(i != 0)
-		{
-			dup2(*(fildes - 2), STDIN_FILENO);
-			close(*(fildes - 2));
-		}
-		pids[i] = _exec(cmds[i], fildes, env);
+		free(fildes);
+		free(pids);
+		return NULL;
+	}
+	i = 0;
+	while(data->cmds[i])
+	{
+		handle_pipe(data, i, fildes);
+		pids[i] = _exec(data->cmds[i], fildes, data->env);
 		fildes += 2;
 		i++;
 	}
@@ -114,17 +109,21 @@ int	*execmap(char **cmds, int fd, char **env)
 }
 
 
-
-int exec_cmd(char **cmds, int fd, char **env)
+int exec_cmd(t_data *data)
 {
 	int *pids;
+	int count;
 	int i;
 
-	pids = execmap(cmds, fd, env);
-
+	count = 0;
+	while(data->cmds[count])
+		count++;
+	dup2(data->fd_in, STDIN_FILENO);
+	close(data->fd_in);
+	pids = execmap(data);
 	i = 0;
-	while(cmds[i])
+	while(data->cmds[i])
 		waitpid(pids[i++], NULL, 0);
-
+	free(pids);
 	return 0;
 }
