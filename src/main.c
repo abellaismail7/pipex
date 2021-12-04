@@ -31,6 +31,7 @@ int main (int ac, char **av, char **env)
 
 	if(ac < 4)
 		return 0;
+	if (av[1] == )
 	data.fd_in = open(av[1], O_RDONLY);
 	if (data.fd_in == -1)
 		die(av[0], av[1]);
