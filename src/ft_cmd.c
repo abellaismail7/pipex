@@ -68,19 +68,19 @@ int	handle_pipe(t_data *data, int index, int *fildes)
 {
 	if (pipe(fildes) == -1)
 		return (-1);
-	if(dup2(fildes[1], STDOUT_FILENO) == -1)
-		return -1;
+	if (dup2(fildes[1], STDOUT_FILENO) == -1)
+		return (-1);
 	close(fildes[1]);
 	if (index + 1 == data->size)
 	{
-		if (dup2(data->fd_out, STDOUT_FILENO))
-			return -1;
+		if (dup2(data->fd_out, STDOUT_FILENO) == -1)
+			return (-1);
 		close(data->fd_out);
 	}
 	if (index != 0)
 	{
-		if (dup2(*(fildes - 2), STDIN_FILENO))
-			return -1;
+		if (dup2(*(fildes - 2), STDIN_FILENO) == -1)
+			return (-1);
 		close(*(fildes - 2));
 	}
 	return (0);
@@ -116,8 +116,6 @@ int	exec_cmd(t_data *data)
 	int	*pids;
 	int	i;
 
-	dup2(data->fd_in, STDIN_FILENO);
-	close(data->fd_in);
 	pids = execmap(data);
 	if(pids == NULL)
 		return (1);

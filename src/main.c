@@ -17,33 +17,46 @@
 #include "ft_error.h"
 #include "ft_cmd.h"
 #include "ft_pipex.h"
+#include "ft_str.h"
 
-char	die(char *basename, char *file)
+int	openOutFile(int ac, char **av, int is_heredoc)
 {
-	show_errno(basename, file);
-	exit(1);
+	int flags;
+
+	flags = O_WRONLY | O_TRUNC | O_CREAT;
+	if (is_heredoc)
+	{
+		flags |= O_APPEND; 
+		flags &= ~O_TRUNC;
+	}
+	return open(av[ac - 1], flags);
 }
 
+void dieIf(int val, char *basename, char *file)
+{
+	if(val == 0)
+		return ;
+	die(basename, file);
+	close(STDIN_FILENO);
+}
 
 int main (int ac, char **av, char **env)
 {
 	t_data data;
+	int is_heredoc;
 
 	if(ac < 4)
-		return 0;
-	if (av[1] == )
-	data.fd_in = open(av[1], O_RDONLY);
-	if (data.fd_in == -1)
-		die(av[0], av[1]);
-	data.fd_out = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT);
-	if (data.fd_out == -1)
-		die(av[0], av[1]);
-	av[ac - 1] = 0;
-	data.size	= ac - 3;
+		return 1;
+	is_heredoc = (ft_strncmp(av[1],"heredoc", 7) == 0);
+	setupInput(av, is_heredoc);
+	data.fd_out = openOutFile(ac, av, is_heredoc);
+	dieIf(data.fd_out == -1, av[0], av[ac - 1]);
 	data.env 	= env;
-	data.cmds 	= av + 2;
+	data.size	= ac - 3 - is_heredoc;
+	data.cmds 	= av + 2 + is_heredoc;
+	av[ac - 1] = 0;
 	exec_cmd(&data);
-	close(data.fd_in);
 	close(data.fd_out);
+	close(STDIN_FILENO);
 	return 0;
 }
