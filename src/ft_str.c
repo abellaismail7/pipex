@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include <stdlib.h>
 
 int	ft_strlen(const char *str)
@@ -69,4 +70,31 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 	while (s1[i] && s1[i] == s2[i] && i < n - 1)
 		i++;
 	return ((unsigned char) s1[i] - (unsigned char) s2[i]);
+}
+
+char	*ft_strdup(char *src)
+{
+	int		i;
+	char	*ret;
+
+	i = 0;
+	while (src[i])
+		i++;
+	ret = malloc(sizeof(char) * (i + 1));
+	if (!ret)
+		return (NULL);
+	i = 0;
+	while (src[i])
+	{
+		ret[i] = src[i];
+		i++;
+	}
+	ret[i] = 0;
+	return (ret);
+}
+
+void ft_putstr(int fd, char *str)
+{
+	write(fd, str, ft_strlen(str));
+
 }

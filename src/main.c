@@ -12,8 +12,9 @@
 
 
 #include <stdlib.h>
-#include<unistd.h>
-#include<fcntl.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
 #include "ft_error.h"
 #include "ft_cmd.h"
 #include "ft_pipex.h"
@@ -29,7 +30,7 @@ int	openOutFile(int ac, char **av, int is_heredoc)
 		flags |= O_APPEND; 
 		flags &= ~O_TRUNC;
 	}
-	return open(av[ac - 1], flags);
+	return open(av[ac - 1], flags, S_IRWXU);
 }
 
 void dieIf(int val, char *basename, char *file)

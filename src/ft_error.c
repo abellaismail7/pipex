@@ -25,7 +25,7 @@ int show_errno(char *basename, char *filename)
 		write(2, basename, ft_strlen(basename));
 		write(2, ": ", 2);
 		write(2, filename, ft_strlen(filename));
-		write(2, " :", 2);
+		write(2, ": ", 2);
 		write(2, str, ft_strlen(str));
 		write(2, "\n", 1);
 		errno = 0;

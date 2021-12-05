@@ -7,16 +7,6 @@
 #include "ft_str.h"
 
 
-void ft_putstr(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i])
-		i++;
-	write(1, str, i);
-}
-
 int	readfromkeyboard(char *until)
 {
 	int fildes[2];
@@ -30,7 +20,7 @@ int	readfromkeyboard(char *until)
 	buf = malloc(sizeof(char *) * (u_len + 1));
 	if(buf == NULL)
 		return -1;
-	ft_putstr("heredoc> ");
+	ft_putstr(1, "heredoc> ");
 	while(1)
 	{
 		while(1)
@@ -46,7 +36,7 @@ int	readfromkeyboard(char *until)
 			if(n != 0 && buf[n - 1] == '\n')
 				break;
 		}
-		ft_putstr("heredoc> ");
+		ft_putstr(1, "heredoc> ");
 	}
 	free(buf);
 	close(fildes[1]);
