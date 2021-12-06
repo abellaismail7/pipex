@@ -66,27 +66,29 @@ char	*get_cmd_path(char *cmd, char **env)
 	return (filename);
 }
 
-int	_exec(char *cmd, int *fds, char **env)
+int	_exec(char *cmd, char **env)
 {
 	char	**args;
 	char	*file;
 	int		pid;
 	int		state;
 
-	fds = fds + 1;
 	args = ft_split(cmd, ' ');
 	file = get_cmd_path(args[0], env);
+	if(file == NULL)
+		return -1;
 	free(args[0]);
 	args[0] = file;
 	pid = fork();
 	if (pid == -1)
-		return (0);
+		return (-1);
 	else if (pid == 0)
 	{
 		state = execve(file, args, env);
 		free(args);
 		exit(state != -1);
 	}
+	free(args);
 	return (pid);
 }
 
@@ -129,8 +131,13 @@ int	*execmap(t_data *data)
 	i = 0;
 	while (data->cmds[i])
 	{
-		handle_pipe(data, i, fildes);
-		pids[i] = _exec(data->cmds[i], fildes, data->env);
+		if (handle_pipe(data, i, fildes) == -1)
+		{
+			free(fildes);
+			free(pids);
+			return (NULL);
+		}
+		pids[i] = _exec(data->cmds[i], data->env);
 		fildes += 2;
 		i++;
 	}
@@ -141,15 +148,21 @@ int	exec_cmd(t_data *data)
 {
 	int	*pids;
 	int	i;
-	int stat_loc;
+	int status;
 
 	pids = execmap(data);
 	if(pids == NULL)
-		return (1);
+		exit(1);
 	i = 0;
-	wait(&stat_loc);
 	while(data->cmds[i])
-		waitpid(pids[i++], NULL, 0);
+		waitpid(pids[i++], &status, 0);
+	if (pids[data->size - 1] == -1)
+		status = 127;
+	else if (!WIFEXITED(status))
+		status = 0;
+	else
+		status = WEXITSTATUS(status);	
 	free(pids);
+	exit(status);
 	return (0);
 }
