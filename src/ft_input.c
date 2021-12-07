@@ -23,20 +23,12 @@ int	readfromkeyboard(char *until)
 	ft_putstr(1, "heredoc> ");
 	while(1)
 	{
-		while(1)
-		{
-			n = read(STDIN_FILENO, buf, u_len); // protection
-			if (n == u_len && ft_strncmp(buf,until, n) == 0)
-			{
-				free(buf);
-				close(fildes[1]);
-				return fildes[0];
-			}
-			write(fildes[1], buf, n);
-			if(n != 0 && buf[n - 1] == '\n')
-				break;
-		}
-		ft_putstr(1, "heredoc> ");
+		n = read(STDIN_FILENO, buf, u_len); // protection
+		if (n == u_len && ft_strncmp(buf,until, n) == 0)
+			break ;
+		write(fildes[1], buf, n);
+		if(n != 0 && buf[n - 1] == '\n')
+			ft_putstr(1, "heredoc> ");
 	}
 	free(buf);
 	close(fildes[1]);

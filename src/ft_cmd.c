@@ -1,70 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_cmd.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iait-bel <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/07 18:32:26 by iait-bel          #+#    #+#             */
+/*   Updated: 2021/12/07 18:32:26 by iait-bel         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include "ft_split.h"
 #include "ft_str.h"
 #include "ft_pipex.h"
-
-char	**get_paths(char **env)
-{
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], "PATH=", 5) == 0)
-			return (ft_split(env[i] + 5, ':'));
-		i++;
-	}
-	return (0);
-}
-
-char *checkRelativePath(char *cmd)
-{
-	if(cmd[0] == '.' && access(cmd, F_OK | X_OK) == 0)
-		return ft_strdup(cmd);
-	return NULL;
-}
-
-char *checkEnvPath(char *cmd, char **paths)
-{
-	char *filename;
-	int i;
-
-	i = 0;
-	filename = NULL;
-	while (paths[i])
-	{
-		filename = ft_strjoin(paths[i], cmd);
-		if(access(filename, F_OK | X_OK) == 0)
-			break ;
-		free(filename);
-		filename = NULL;
-		i++;
-	}
-	return filename;
-}
-
-char	*get_cmd_path(char *cmd, char **env)
-{
-	char	**paths;
-	char	*filename;
-
-	filename = checkRelativePath(cmd);
-	if (filename == NULL)
-	{
-		paths = get_paths(env);
-		filename = checkEnvPath(cmd, paths);
-		free(paths);
-	}
-	if (filename == NULL)
-	{
-		ft_putstr(2, "pipex: command not found: ");
-		ft_putstr(2, cmd);
-		ft_putstr(2, "\n");
-	}
-	return (filename);
-}
 
 int	_exec(char *cmd, char **env)
 {
@@ -75,8 +26,8 @@ int	_exec(char *cmd, char **env)
 
 	args = ft_split(cmd, ' ');
 	file = get_cmd_path(args[0], env);
-	if(file == NULL)
-		return -1;
+	if (file == NULL)
+		return (-1);
 	free(args[0]);
 	args[0] = file;
 	pid = fork();
@@ -148,20 +99,20 @@ int	exec_cmd(t_data *data)
 {
 	int	*pids;
 	int	i;
-	int status;
+	int	status;
 
 	pids = execmap(data);
-	if(pids == NULL)
+	if (pids == NULL)
 		exit(1);
 	i = 0;
-	while(data->cmds[i])
+	while (data->cmds[i])
 		waitpid(pids[i++], &status, 0);
 	if (pids[data->size - 1] == -1)
 		status = 127;
 	else if (!WIFEXITED(status))
 		status = 0;
 	else
-		status = WEXITSTATUS(status);	
+		status = WEXITSTATUS(status);
 	free(pids);
 	exit(status);
 	return (0);
