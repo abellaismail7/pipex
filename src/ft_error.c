@@ -16,10 +16,11 @@
 #include <stdlib.h>
 #include "ft_str.h"
 
-int show_errno(char *basename, char *filename)
+int	show_errno(char *basename, char *filename)
 {
-	char *str;
-	if(errno)
+	char	*str;
+
+	if (errno)
 	{
 		str = strerror(errno);
 		write(2, basename, ft_strlen(basename));
@@ -30,7 +31,7 @@ int show_errno(char *basename, char *filename)
 		write(2, "\n", 1);
 		errno = 0;
 		exit(1);
-		return 1;
+		return (1);
 	}
-	return 0;
+	return (0);
 }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_path.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iait-bel <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/08 16:22:57 by iait-bel          #+#    #+#             */
+/*   Updated: 2021/12/08 16:22:57 by iait-bel         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_str.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -16,30 +28,30 @@ char	**get_paths(char **env)
 	return (0);
 }
 
-char *checkRelativePath(char *cmd)
+char	*check_relativepath(char *cmd)
 {
-	if(cmd[0] == '.' && access(cmd, F_OK | X_OK) == 0)
-		return ft_strdup(cmd);
-	return NULL;
+	if (cmd[0] == '.' && access(cmd, F_OK | X_OK) == 0)
+		return (ft_strdup(cmd));
+	return (NULL);
 }
 
-char *checkEnvPath(char *cmd, char **paths)
+char	*check_envpath(char *cmd, char **paths)
 {
-	char *filename;
-	int i;
+	char	*filename;
+	int		i;
 
 	i = 0;
 	filename = NULL;
 	while (paths[i])
 	{
 		filename = ft_strjoin(paths[i], cmd);
-		if(access(filename, F_OK | X_OK) == 0)
+		if (access(filename, F_OK | X_OK) == 0)
 			break ;
 		free(filename);
 		filename = NULL;
 		i++;
 	}
-	return filename;
+	return (filename);
 }
 
 char	*get_cmd_path(char *cmd, char **env)
@@ -47,11 +59,11 @@ char	*get_cmd_path(char *cmd, char **env)
 	char	**paths;
 	char	*filename;
 
-	filename = checkRelativePath(cmd);
+	filename = check_relativepath(cmd);
 	if (filename == NULL)
 	{
 		paths = get_paths(env);
-		filename = checkEnvPath(cmd, paths);
+		filename = check_envpath(cmd, paths);
 		free(paths);
 	}
 	if (filename == NULL)

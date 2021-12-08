@@ -23,7 +23,7 @@ int	ft_strlen(const char *str)
 	return (i);
 }
 
-unsigned int ft_strlcpy(char *dest, const char *src, unsigned int size)
+unsigned int	ft_strlcpy(char *dest, const char *src, unsigned int size)
 {
 	unsigned int	i;
 
@@ -91,10 +91,4 @@ char	*ft_strdup(char *src)
 	}
 	ret[i] = 0;
 	return (ret);
-}
-
-void ft_putstr(int fd, char *str)
-{
-	write(fd, str, ft_strlen(str));
-
 }

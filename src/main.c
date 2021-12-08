@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include "ft_error.h"
 #include "ft_cmd.h"
 #include "ft_pipex.h"
 #include "ft_str.h"
@@ -48,7 +47,7 @@ int	main(int ac, char **av, char **env)
 	if (ac < 4)
 		return (1);
 	is_heredoc = (ft_strncmp(av[1], HEREDOC, HEREDOC_LEN) == 0);
-	setupInput(av, is_heredoc);
+	setupinput(av, is_heredoc);
 	data.fd_out = open_outfile(ac, av, is_heredoc);
 	die_if(data.fd_out == -1, av[0], av[ac - 1]);
 	data.env = env;

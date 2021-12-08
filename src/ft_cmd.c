@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
-#include "ft_split.h"
 #include "ft_str.h"
 #include "ft_pipex.h"
 
