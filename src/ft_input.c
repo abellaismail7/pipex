@@ -11,8 +11,8 @@
 /* ************************************************************************** */
 
 #include <stdlib.h>
-#include<unistd.h>
-#include<fcntl.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include "ft_cmd.h"
 #include "ft_pipex.h"
 #include "ft_str.h"
@@ -59,7 +59,7 @@ void	setupinput(char **av, int is_heredoc)
 	else
 		fd_in = open(av[1], O_RDONLY);
 	if (fd_in == -1)
-		die(av[0], av[1]);
+		show_errno(av[0], av[1]);
 	dup2(fd_in, STDIN_FILENO);
 	close(fd_in);
 }

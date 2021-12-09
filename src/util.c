@@ -18,3 +18,9 @@ void	die(char *basename, char *file)
 	show_errno(basename, file);
 	exit(1);
 }
+
+int	ft_free(void *ptr)
+{
+	free(ptr);
+	return (1);
+}

@@ -21,9 +21,10 @@ int	_exec(char *cmd, char **env)
 	char	**args;
 	char	*file;
 	int		pid;
-	int		state;
 
 	args = ft_split(cmd, ' ');
+	if (args == NULL)
+		return (-1);
 	file = get_cmd_path(args[0], env);
 	if (file == NULL)
 		return (-1);
@@ -34,11 +35,10 @@ int	_exec(char *cmd, char **env)
 		return (-1);
 	else if (pid == 0)
 	{
-		state = execve(file, args, env);
-		free(args);
-		exit(state != -1);
+		execve(file, args, env);
+		exit(0);
 	}
-	free(args);
+	free_split(args);
 	return (pid);
 }
 
@@ -72,21 +72,15 @@ int	*execmap(t_data *data)
 
 	fildes = malloc(sizeof(int *) * (data->size * 2));
 	pids = malloc(sizeof(int *) * data->size);
-	if (fildes == NULL || pids == NULL)
-	{
-		free(fildes);
-		free(pids);
+	if ((fildes == NULL || pids == NULL)
+		&& ft_free(fildes) && ft_free(pids))
 		return (NULL);
-	}
 	i = 0;
-	while (data->cmds[i])
+	while (i < data->size)
 	{
-		if (handle_pipe(data, i, fildes) == -1)
-		{
-			free(fildes);
-			free(pids);
+		if ((handle_pipe(data, i, fildes) == -1)
+			&& ft_free(fildes) && ft_free(pids))
 			return (NULL);
-		}
 		pids[i] = _exec(data->cmds[i], data->env);
 		fildes += 2;
 		i++;
@@ -104,7 +98,7 @@ int	exec_cmd(t_data *data)
 	if (pids == NULL)
 		exit(1);
 	i = 0;
-	while (data->cmds[i])
+	while (data->cmds[i - 1])
 		waitpid(pids[i++], &status, 0);
 	if (pids[data->size - 1] == -1)
 		status = 127;

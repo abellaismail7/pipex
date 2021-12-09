@@ -20,6 +20,7 @@ void	setupinput(char **av, int is_heredoc);
 void	die(char *basename, char *file);
 char	*get_cmd_path(char *cmd, char **env);
 int		show_errno(char *basename, char *filename);
+int		ft_free(void *free);
 
 typedef struct s_data
 {

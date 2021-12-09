@@ -61,11 +61,15 @@ static char	*create_word(char *str, char c, char **word)
 	return (str);
 }
 
-static void	free_split(char **result, int size)
+void	free_split(char **result)
 {
-	while (size--)
+	int	i;
+
+	i = 0;
+	while (result[i])
 	{
-		free(result[size]);
+		free(result[i]);
+		i++;
 	}
 	free(result);
 }
@@ -91,7 +95,7 @@ char	**ft_split(char *str, char c)
 		str = create_word(str, c, result + i);
 		if (str == 0)
 		{
-			free_split(result, i);
+			free_split(result);
 			return (0);
 		}
 		i++;

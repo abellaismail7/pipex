@@ -20,5 +20,6 @@ char			*ft_strjoin(char const *s1, char const *s2);
 char			*ft_strdup(char *src);
 void			ft_putstr(int fd, char *str);
 char			**ft_split(char *str, char c);
+void			free_split(char **result);
 
 #endif

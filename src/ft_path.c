@@ -42,10 +42,12 @@ char	*check_envpath(char *cmd, char **paths)
 
 	i = 0;
 	filename = NULL;
+	if (paths == NULL)
+		return (NULL);
 	while (paths[i])
 	{
 		filename = ft_strjoin(paths[i], cmd);
-		if (access(filename, F_OK | X_OK) == 0)
+		if (filename != NULL && access(filename, F_OK | X_OK) == 0)
 			break ;
 		free(filename);
 		filename = NULL;
