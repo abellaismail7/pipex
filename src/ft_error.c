@@ -30,7 +30,6 @@ int	show_errno(char *basename, char *filename)
 		write(2, str, ft_strlen(str));
 		write(2, "\n", 1);
 		errno = 0;
-		exit(1);
 		return (1);
 	}
 	return (0);

@@ -21,6 +21,7 @@
 int	open_outfile(int ac, char **av, int is_heredoc)
 {
 	int	flags;
+	int	fd;
 
 	flags = O_WRONLY | O_TRUNC | O_CREAT;
 	if (is_heredoc)
@@ -28,7 +29,9 @@ int	open_outfile(int ac, char **av, int is_heredoc)
 		flags |= O_APPEND;
 		flags &= ~O_TRUNC;
 	}
-	return (open(av[ac - 1], flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
+	fd = (open(av[ac - 1], flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
+	show_errno(av[0], av[ac -1]);
+	return fd;
 }
 
 int	main(int ac, char **av, char **env)
@@ -45,7 +48,5 @@ int	main(int ac, char **av, char **env)
 	data.size = ac - 3 - is_heredoc;
 	data.cmds = av + 2 + is_heredoc;
 	av[ac - 1] = 0;
-	exec_cmd(&data);
-	close(data.fd_out);
-	return (0);
+	return exec_cmd(&data);
 }

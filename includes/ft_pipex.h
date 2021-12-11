@@ -21,6 +21,8 @@ void	die(char *basename, char *file);
 char	*get_cmd_path(char *cmd, char **env);
 int		show_errno(char *basename, char *filename);
 int		ft_free(void *free);
+int	*ft_ialloc(int size, int defval);
+int	ft_dup2(int fd1, int fd2);
 
 typedef struct s_data
 {

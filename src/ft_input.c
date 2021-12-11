@@ -38,8 +38,8 @@ int	readfromkeyboard(char *until)
 	ft_putstr(1, "heredoc> ");
 	while (1)
 	{
-		n = read(STDIN_FILENO, buf, u_len); // protection
-		if (n == u_len && ft_strncmp(buf, until, n) == 0)
+		n = read(STDIN_FILENO, buf, u_len);
+		if (n == -1 || (n == u_len && ft_strncmp(buf, until, n) == 0))
 			break ;
 		write(fildes[1], buf, n);
 		if (n != 0 && buf[n - 1] == '\n')
@@ -48,6 +48,18 @@ int	readfromkeyboard(char *until)
 	free(buf);
 	close(fildes[1]);
 	return (fildes[0]);
+}
+
+void	fake_input(int is_heredoc)
+{
+	int	fildes[2];
+
+	if (is_heredoc || pipe(fildes) == -1)
+		exit(1);
+	if (dup2(fildes[0], STDIN_FILENO) == -1)
+		exit(1);
+	close(fildes[0]);
+	close(fildes[1]);
 }
 
 void	setupinput(char **av, int is_heredoc)
@@ -59,7 +71,10 @@ void	setupinput(char **av, int is_heredoc)
 	else
 		fd_in = open(av[1], O_RDONLY);
 	if (fd_in == -1)
+	{
 		show_errno(av[0], av[1]);
-	dup2(fd_in, STDIN_FILENO);
-	close(fd_in);
+		fake_input(is_heredoc);
+	}
+	else
+		ft_dup2(fd_in, STDIN_FILENO);
 }

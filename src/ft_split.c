@@ -61,7 +61,7 @@ static char	*create_word(char *str, char c, char **word)
 	return (str);
 }
 
-void	free_split(char **result)
+int	free_split(char **result)
 {
 	int	i;
 
@@ -72,6 +72,7 @@ void	free_split(char **result)
 		i++;
 	}
 	free(result);
+	return (1);
 }
 
 char	**ft_split(char *str, char c)

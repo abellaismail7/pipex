@@ -66,7 +66,7 @@ char	*get_cmd_path(char *cmd, char **env)
 	{
 		paths = get_paths(env);
 		filename = check_envpath(cmd, paths);
-		free(paths);
+		free_split(paths);
 	}
 	if (filename == NULL)
 	{

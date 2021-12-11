@@ -26,14 +26,12 @@ int	_exec(char *cmd, char **env)
 	if (args == NULL)
 		return (-1);
 	file = get_cmd_path(args[0], env);
-	if (file == NULL)
+	if (file == NULL && free_split(args))
 		return (-1);
 	free(args[0]);
 	args[0] = file;
 	pid = fork();
-	if (pid == -1)
-		return (-1);
-	else if (pid == 0)
+	if (pid == 0)
 	{
 		execve(file, args, env);
 		exit(0);
@@ -46,20 +44,17 @@ int	handle_pipe(t_data *data, int index, int *fildes)
 {
 	if (pipe(fildes) == -1)
 		return (-1);
-	if (dup2(fildes[1], STDOUT_FILENO) == -1)
+	if (ft_dup2(fildes[1], STDOUT_FILENO) == -1)
 		return (-1);
-	close(fildes[1]);
 	if (index + 1 == data->size)
 	{
-		if (dup2(data->fd_out, STDOUT_FILENO) == -1)
+		if (ft_dup2(data->fd_out, STDOUT_FILENO) == -1)
 			return (-1);
-		close(data->fd_out);
 	}
 	if (index != 0)
 	{
-		if (dup2(*(fildes - 2), STDIN_FILENO) == -1)
+		if (ft_dup2(*(fildes - 2), STDIN_FILENO) == -1)
 			return (-1);
-		close(*(fildes - 2));
 	}
 	return (0);
 }
@@ -67,24 +62,27 @@ int	handle_pipe(t_data *data, int index, int *fildes)
 int	*execmap(t_data *data)
 {
 	int	i;
+	int	*fds;
 	int	*fildes;
 	int	*pids;
 
-	fildes = malloc(sizeof(int *) * (data->size * 2));
-	pids = malloc(sizeof(int *) * data->size);
+	fildes = malloc(sizeof(int) * (data->size * 2));
+	pids = ft_ialloc(data->size, -1);
 	if ((fildes == NULL || pids == NULL)
 		&& ft_free(fildes) && ft_free(pids))
 		return (NULL);
 	i = 0;
+	fds = fildes;
 	while (i < data->size)
 	{
-		if ((handle_pipe(data, i, fildes) == -1)
-			&& ft_free(fildes) && ft_free(pids))
-			return (NULL);
+		if ((handle_pipe(data, i, fds) == -1)
+			&& ft_free(fildes))
+			return (pids);
 		pids[i] = _exec(data->cmds[i], data->env);
-		fildes += 2;
+		fds += 2;
 		i++;
 	}
+	free(fildes);
 	return (pids);
 }
 
@@ -99,7 +97,11 @@ int	exec_cmd(t_data *data)
 		exit(1);
 	i = 0;
 	while (data->cmds[i - 1])
-		waitpid(pids[i++], &status, 0);
+	{
+		if (pids[i] >= 0)
+			waitpid(pids[i], &status, 0);
+		i++;
+	}
 	if (pids[data->size - 1] == -1)
 		status = 127;
 	else if (!WIFEXITED(status))
@@ -107,6 +109,5 @@ int	exec_cmd(t_data *data)
 	else
 		status = WEXITSTATUS(status);
 	free(pids);
-	exit(status);
-	return (0);
+	return status;
 }
